@@ -10,6 +10,7 @@ import { Model } from 'mongoose';
 import { CategoryDocument, Category } from '../models/category.model';
 import { JOB_STATUSES } from '../interfaces';
 import { defaultOptions, getJobOpts } from '../processors/options';
+import { stripQuery } from '../helpers/url-helpers';
 
 export enum ParsingTaskEnum {
   PARSE_CATEGORY = 'CATEGORY',
@@ -38,10 +39,26 @@ export class ParserPlanService {
   }
 
   public async addParsingTask(url: string, type: ParsingTaskEnum) {
+    url = stripQuery(url);
+
     if (type === ParsingTaskEnum.PARSE_CATEGORY) {
-      const dbCategory = await this.category.create({
-        status: JOB_STATUSES.PENDING,
+      let dbCategory = null;
+
+      dbCategory = await this.category.findOne({
+        url: url,
       });
+
+      if (dbCategory) {
+        dbCategory.status = JOB_STATUSES.PENDING;
+        await dbCategory.save();
+      }
+
+      dbCategory =
+        dbCategory ||
+        (await this.category.create({
+          url: url,
+          status: JOB_STATUSES.PENDING,
+        }));
 
       const job = await this.parseCategoryQueue.add(
         {
@@ -55,9 +72,23 @@ export class ParserPlanService {
       dbCategory.jobId = job.id as string;
       await dbCategory.save();
     } else if (type === ParsingTaskEnum.PARSE_PRODUCT) {
-      const dbProduct = await this.product.create({
-        status: JOB_STATUSES.PENDING,
+      let dbProduct = null;
+
+      dbProduct = await this.product.findOne({
+        url: url,
       });
+
+      if (dbProduct) {
+        dbProduct.status = JOB_STATUSES.PENDING;
+        await dbProduct.save();
+      }
+
+      dbProduct =
+        dbProduct ||
+        (await this.product.create({
+          url: url,
+          status: JOB_STATUSES.PENDING,
+        }));
 
       const job = await this.parseProductQueue.add(
         {

@@ -7,6 +7,9 @@ export class Product {
   title: string;
 
   @Prop()
+  url: string;
+
+  @Prop()
   categoryId: string;
 
   @Prop({ type: MongooseSchema.Types.Mixed })

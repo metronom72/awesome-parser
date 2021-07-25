@@ -8,6 +8,7 @@ import { ProductDocument, Product } from '../models/product.model';
 import { JOB_STATUSES } from '../interfaces';
 import { CategoryDocument, Category } from '../models/category.model';
 import { defaultOptions, getJobOpts } from './options';
+import { stripQuery } from '../helpers/url-helpers';
 
 export const ParseCategoryProcessorName = 'parse-category';
 
@@ -33,14 +34,28 @@ export class ParseCategoryProcessor {
         throw new Error(`Category with id ${data.id} wasn't found`);
       }
 
-      const urls = await getProductUrls(data.url);
+      const urls = (await getProductUrls(data.url)).map(stripQuery);
 
       if (urls.length > 0) {
         for (const url of urls) {
-          const dbProduct = await this.product.create({
-            categoryId: dbCategory.id,
-            status: JOB_STATUSES.PENDING,
+          let dbProduct = null;
+
+          dbProduct = await this.product.findOne({
+            url: url,
           });
+
+          if (dbProduct) {
+            dbProduct.status = JOB_STATUSES.PENDING;
+            await dbProduct.save();
+          }
+
+          dbProduct =
+            dbProduct ||
+            (await this.product.create({
+              categoryId: dbCategory.id,
+              url: url,
+              status: JOB_STATUSES.PENDING,
+            }));
           const productJob = await this.parseProductQueue.add(
             {
               id: dbProduct.id,
