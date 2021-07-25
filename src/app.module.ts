@@ -21,27 +21,23 @@ import { ProductModel, ProductSchema } from './models/product.model';
 
 @Module({
   imports: [
+    BullModule.forRootAsync({
+      useFactory: () => ({
+        redis: {
+          host: 'redis',
+          port: 6379,
+        },
+      }),
+    }),
     BullModule.registerQueue(
       {
         name: ParseRootProcessorName,
-        redis: {
-          host: 'redis',
-          port: 6379,
-        },
       },
       {
         name: ParseCategoryProcessorName,
-        redis: {
-          host: 'redis',
-          port: 6379,
-        },
       },
       {
         name: ParseProductProcessorName,
-        redis: {
-          host: 'redis',
-          port: 6379,
-        },
       },
     ),
     MongooseModule.forRoot(

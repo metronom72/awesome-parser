@@ -4,6 +4,12 @@ import { Queue } from 'bull';
 import { ParseRootProcessorName } from '../processors/parse-root.processor';
 import { ParseCategoryProcessorName } from '../processors/parse-category.processor';
 import { ParseProductProcessorName } from '../processors/parse-product.processor';
+import { InjectModel } from '@nestjs/mongoose';
+import { ProductDocument, ProductModel } from '../models/product.model';
+import { Model } from 'mongoose';
+import { CategoryDocument, CategoryModel } from '../models/category.model';
+import { JOB_STATUSES } from '../interfaces';
+import { defaultOptions, getJobOpts } from '../processors/options';
 
 export enum ParsingTaskEnum {
   PARSE_CATEGORY = 'CATEGORY',
@@ -16,6 +22,10 @@ export class ParserPlanService {
     @InjectQueue(ParseRootProcessorName) private rootQueue: Queue,
     @InjectQueue(ParseCategoryProcessorName) private parseCategoryQueue: Queue,
     @InjectQueue(ParseProductProcessorName) private parseProductQueue: Queue,
+    @InjectModel(ProductModel.name)
+    private product: Model<ProductDocument>,
+    @InjectModel(CategoryModel.name)
+    private category: Model<CategoryDocument>,
   ) {}
 
   public async generatePlan() {
@@ -29,17 +39,37 @@ export class ParserPlanService {
 
   public async addParsingTask(url: string, type: ParsingTaskEnum) {
     if (type === ParsingTaskEnum.PARSE_CATEGORY) {
-      const job = await this.parseCategoryQueue.add({
-        url,
-        isCustom: true,
+      const dbCategory = await this.category.create({
+        status: JOB_STATUSES.PENDING,
       });
 
-      return job.id;
+      const job = await this.parseCategoryQueue.add(
+        {
+          url,
+          id: dbCategory.id,
+          isCustom: true,
+        },
+        getJobOpts(),
+      );
+
+      dbCategory.jobId = job.id as string;
+      await dbCategory.save();
     } else if (type === ParsingTaskEnum.PARSE_PRODUCT) {
-      const job = await this.parseProductQueue.add({
-        url,
-        isCustom: true,
+      const dbProduct = await this.product.create({
+        status: JOB_STATUSES.PENDING,
       });
+
+      const job = await this.parseProductQueue.add(
+        {
+          url,
+          id: dbProduct.id,
+          isCustom: true,
+        },
+        getJobOpts(),
+      );
+
+      dbProduct.jobId = job.id as string;
+      await dbProduct.save();
     }
     return null;
   }

@@ -11,6 +11,12 @@ export class CategoryModel {
 
   @Prop()
   parentUrl: string | null;
+
+  @Prop()
+  jobId: string | null;
+
+  @Prop()
+  status: string;
 }
 
 export type CategoryDocument = CategoryModel & Document;

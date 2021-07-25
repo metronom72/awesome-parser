@@ -29,7 +29,6 @@ export async function getBrowser(headless: boolean) {
         // '--unhandled-rejections=none',
         // '--disable-dev-shm-usage',
       ],
-      headful: !headless,
       headless: headless,
       devtools: false,
       ignoreHTTPSErrors: true,
@@ -43,6 +42,7 @@ export async function getBrowser(headless: boolean) {
     return browser;
   } catch (err) {
     console.log(err);
+    throw err;
   }
 }
 
@@ -88,6 +88,7 @@ export async function setPage(browser) {
     return page;
   } catch (err) {
     console.log(err);
+    throw err;
   }
 }
 
@@ -185,6 +186,7 @@ export async function getCategories(url: string): Promise<
     ];
   } catch (err) {
     console.log(err);
+    throw err;
   }
 }
 
@@ -214,6 +216,7 @@ export async function getProductUrls(url: string, headless = true) {
     return urls;
   } catch (err) {
     console.log(err);
+    throw err;
   }
 }
 
@@ -268,17 +271,18 @@ export async function getProduct(url: string, headless = true) {
           nodes.map(({ innerHTML }) => innerHTML),
         );
         properties.push({
-          title: propertyTitle[0] || null,
-          value: propertyValue[0],
+          title: stripHTMLTags(propertyTitle[0]) || null,
+          value: stripHTMLTags(propertyValue[0]),
         });
       }
       sections.push({
-        title: sectionTitle[0] || null,
+        title: stripHTMLTags(sectionTitle[0]) || null,
         values: properties,
       });
     }
   } catch (err) {
     console.log(err);
+    throw err;
   }
 
   if (headless) {

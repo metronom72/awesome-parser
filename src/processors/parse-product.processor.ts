@@ -9,6 +9,7 @@ import { getProduct } from '../helpers/puppeteer-helpers';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ProductModel } from '../models/product.model';
+import { JOB_STATUSES } from '../interfaces';
 
 export const ParseProductProcessorName = 'parse-product';
 
@@ -25,27 +26,25 @@ export class ParseProductProcessor {
   async transcode(job: Job) {
     const { data } = job;
     try {
-      if (!data.isCustom) {
-        const parserPlan = await this.parserPlan.findById(data.parserPlanId);
-
-        if (
-          !parserPlan ||
-          parserPlan.status !== ParserPlanStatuses.IN_PROGRESS
-        ) {
-          return;
-        }
+      const dbProduct = await this.product.findById(data.id);
+      if (!dbProduct) {
+        throw new Error(`Product with id ${data.id} wasn't found`);
       }
 
       const product = await getProduct(data.url);
 
-      await this.product.create(product);
+      Object.entries(product).forEach(([key, value]) => {
+        dbProduct[key] = value;
+      });
 
-      if (!product) {
-        console.log("product wasn't found");
-        await getProduct(data.url, false);
-      }
+      dbProduct.jobId = null;
+      dbProduct.status = JOB_STATUSES.FINISHED;
+
+      await dbProduct.save();
+      return;
     } catch (err) {
       console.log(err);
+      throw err;
     }
   }
 }

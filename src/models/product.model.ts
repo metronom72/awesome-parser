@@ -26,6 +26,12 @@ export class ProductModel {
 
   @Prop()
   previousPrice: string;
+
+  @Prop()
+  jobId: string | null;
+
+  @Prop()
+  status: string;
 }
 
 export type ProductDocument = ProductModel & Document;
