@@ -1,14 +1,9 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Job } from 'bull';
-import {
-  ParserPlanDocument,
-  ParserPlanModel,
-  ParserPlanStatuses,
-} from '../models/parser-plan.model';
 import { getProduct } from '../helpers/puppeteer-helpers';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ProductModel } from '../models/product.model';
+import { Product } from '../models/product.model';
 import { JOB_STATUSES } from '../interfaces';
 
 export const ParseProductProcessorName = 'parse-product';
@@ -16,10 +11,8 @@ export const ParseProductProcessorName = 'parse-product';
 @Processor(ParseProductProcessorName)
 export class ParseProductProcessor {
   constructor(
-    @InjectModel(ParserPlanModel.name)
-    private parserPlan: Model<ParserPlanDocument>,
-    @InjectModel(ProductModel.name)
-    private product: Model<ProductModel>,
+    @InjectModel(Product.name)
+    private product: Model<Product>,
   ) {}
 
   @Process()

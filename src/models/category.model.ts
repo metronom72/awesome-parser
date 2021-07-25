@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 @Schema()
-export class CategoryModel {
+export class Category {
   @Prop()
   title: string;
 
@@ -19,6 +19,6 @@ export class CategoryModel {
   status: string;
 }
 
-export type CategoryDocument = CategoryModel & Document;
+export type CategoryDocument = Category & Document;
 
-export const CategorySchema = SchemaFactory.createForClass(CategoryModel);
+export const CategorySchema = SchemaFactory.createForClass(Category);

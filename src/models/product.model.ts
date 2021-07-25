@@ -2,12 +2,12 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
 @Schema()
-export class ProductModel {
+export class Product {
   @Prop()
   title: string;
 
   @Prop()
-  category: string;
+  categoryId: string;
 
   @Prop({ type: MongooseSchema.Types.Mixed })
   properties: any;
@@ -34,6 +34,6 @@ export class ProductModel {
   status: string;
 }
 
-export type ProductDocument = ProductModel & Document;
+export type ProductDocument = Product & Document;
 
-export const ProductSchema = SchemaFactory.createForClass(ProductModel);
+export const ProductSchema = SchemaFactory.createForClass(Product);

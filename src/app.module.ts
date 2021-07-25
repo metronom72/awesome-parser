@@ -7,8 +7,7 @@ import {
   ParseRootProcessorName,
 } from './processors/parse-root.processor';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ParserPlanModel, ParserPlanSchema } from './models/parser-plan.model';
-import { CategoryModel, CategorySchema } from './models/category.model';
+import { Category, CategorySchema } from './models/category.model';
 import {
   ParseCategoryProcessor,
   ParseCategoryProcessorName,
@@ -17,15 +16,19 @@ import {
   ParseProductProcessor,
   ParseProductProcessorName,
 } from './processors/parse-product.processor';
-import { ProductModel, ProductSchema } from './models/product.model';
+import { Product, ProductSchema } from './models/product.model';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
     BullModule.forRootAsync({
       useFactory: () => ({
         redis: {
-          host: 'redis',
-          port: 6379,
+          host: process.env.REDIS_HOST,
+          port: parseInt(process.env.REDIS_PORT),
         },
       }),
     }),
@@ -41,19 +44,15 @@ import { ProductModel, ProductSchema } from './models/product.model';
       },
     ),
     MongooseModule.forRoot(
-      'mongodb+srv://robot:9Xs4wDkLSMozwxWU@cluster0.y2sjv.mongodb.net/parser_db?retryWrites=true&w=majority',
+      `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority`,
     ),
     MongooseModule.forFeature([
       {
-        name: ParserPlanModel.name,
-        schema: ParserPlanSchema,
-      },
-      {
-        name: CategoryModel.name,
+        name: Category.name,
         schema: CategorySchema,
       },
       {
-        name: ProductModel.name,
+        name: Product.name,
         schema: ProductSchema,
       },
     ]),

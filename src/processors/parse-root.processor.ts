@@ -4,7 +4,7 @@ import { Job, Queue } from 'bull';
 import { getCategories } from '../helpers/puppeteer-helpers';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CategoryDocument, CategoryModel } from '../models/category.model';
+import { CategoryDocument, Category } from '../models/category.model';
 import { ParseCategoryProcessorName } from './parse-category.processor';
 import { JOB_STATUSES } from '../interfaces';
 import { defaultOptions, getJobOpts } from './options';
@@ -14,7 +14,7 @@ export const ParseRootProcessorName = 'parse-root';
 @Processor(ParseRootProcessorName)
 export class ParseRootProcessor {
   constructor(
-    @InjectModel(CategoryModel.name)
+    @InjectModel(Category.name)
     private category: Model<CategoryDocument>,
     @InjectQueue(ParseCategoryProcessorName) private parseCategoryQueue: Queue,
   ) {}

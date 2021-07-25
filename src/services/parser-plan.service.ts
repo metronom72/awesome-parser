@@ -5,9 +5,9 @@ import { ParseRootProcessorName } from '../processors/parse-root.processor';
 import { ParseCategoryProcessorName } from '../processors/parse-category.processor';
 import { ParseProductProcessorName } from '../processors/parse-product.processor';
 import { InjectModel } from '@nestjs/mongoose';
-import { ProductDocument, ProductModel } from '../models/product.model';
+import { ProductDocument, Product } from '../models/product.model';
 import { Model } from 'mongoose';
-import { CategoryDocument, CategoryModel } from '../models/category.model';
+import { CategoryDocument, Category } from '../models/category.model';
 import { JOB_STATUSES } from '../interfaces';
 import { defaultOptions, getJobOpts } from '../processors/options';
 
@@ -22,9 +22,9 @@ export class ParserPlanService {
     @InjectQueue(ParseRootProcessorName) private rootQueue: Queue,
     @InjectQueue(ParseCategoryProcessorName) private parseCategoryQueue: Queue,
     @InjectQueue(ParseProductProcessorName) private parseProductQueue: Queue,
-    @InjectModel(ProductModel.name)
+    @InjectModel(Product.name)
     private product: Model<ProductDocument>,
-    @InjectModel(CategoryModel.name)
+    @InjectModel(Category.name)
     private category: Model<CategoryDocument>,
   ) {}
 

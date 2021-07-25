@@ -4,9 +4,9 @@ import { Model } from 'mongoose';
 import { Job, Queue } from 'bull';
 import { getProductUrls } from '../helpers/puppeteer-helpers';
 import { ParseProductProcessorName } from './parse-product.processor';
-import { ProductDocument, ProductModel } from '../models/product.model';
+import { ProductDocument, Product } from '../models/product.model';
 import { JOB_STATUSES } from '../interfaces';
-import { CategoryDocument, CategoryModel } from '../models/category.model';
+import { CategoryDocument, Category } from '../models/category.model';
 import { defaultOptions, getJobOpts } from './options';
 
 export const ParseCategoryProcessorName = 'parse-category';
@@ -16,9 +16,9 @@ const MAX_PAGE = 5;
 @Processor({ name: ParseCategoryProcessorName })
 export class ParseCategoryProcessor {
   constructor(
-    @InjectModel(ProductModel.name)
+    @InjectModel(Product.name)
     private product: Model<ProductDocument>,
-    @InjectModel(CategoryModel.name)
+    @InjectModel(Category.name)
     private category: Model<CategoryDocument>,
     @InjectQueue(ParseCategoryProcessorName) private parseCategoryQueue: Queue,
     @InjectQueue(ParseProductProcessorName) private parseProductQueue: Queue,
@@ -38,6 +38,7 @@ export class ParseCategoryProcessor {
       if (urls.length > 0) {
         for (const url of urls) {
           const dbProduct = await this.product.create({
+            categoryId: dbCategory.id,
             status: JOB_STATUSES.PENDING,
           });
           const productJob = await this.parseProductQueue.add(

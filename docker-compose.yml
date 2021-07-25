@@ -10,8 +10,8 @@ services:
     expose:
       - 3000
     command: npm run start:prod
-    env_file:
-      - .env
+#    env_file:
+#      - .env
     networks:
       - webnet
     depends_on:

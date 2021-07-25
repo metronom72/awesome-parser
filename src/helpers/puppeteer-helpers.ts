@@ -12,7 +12,6 @@ export async function getBrowser(headless: boolean) {
   try {
     puppeteer.use(stealthPlugin());
     puppeteer.use(adblockPlugin({ blockTrackers: true }));
-    console.log('headless is', headless);
 
     const browser = await puppeteer.launch({
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
