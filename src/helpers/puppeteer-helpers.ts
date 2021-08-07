@@ -8,27 +8,41 @@ const adblockPlugin = require('puppeteer-extra-plugin-adblocker');
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Safari/537.36';
 
+async function autoScroll(page, maxHeight = 10000) {
+  return await page.evaluate(async () => {
+    await new Promise((resolve, reject) => {
+      let attempts = 0;
+      let totalHeight = 0;
+      const distance = 500;
+      const timer = setInterval(() => {
+        attempts += 1;
+        const scrollHeight = document.body.scrollHeight;
+        window.scrollBy(0, distance);
+        totalHeight += distance;
+
+        if (
+          totalHeight >= scrollHeight ||
+          totalHeight >= maxHeight ||
+          attempts > maxHeight / distance
+        ) {
+          clearInterval(timer);
+          resolve({ attempts, totalHeight });
+        }
+      }, 100);
+    });
+  });
+}
+
 export async function getBrowser(headless: boolean) {
   try {
     puppeteer.use(stealthPlugin());
-    puppeteer.use(adblockPlugin({ blockTrackers: true }));
+    // puppeteer.use(adblockPlugin({ blockTrackers: true }));
 
     const browser = await puppeteer.launch({
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      args: [
-        // '--disable-gpu',
-        '--no-sandbox',
-        // '--no-zygote',
-        '--disable-setuid-sandbox',
-        // '--disable-accelerated-2d-canvas',
-        // '--disable-dev-shm-usage',
-        // "--proxy-server='direct://'",
-        // '--proxy-bypass-list=*',
-        // '--unhandled-rejections=none',
-        // '--disable-dev-shm-usage',
-      ],
-      headless: headless,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless,
       devtools: false,
       ignoreHTTPSErrors: true,
       slowMo: 0,
@@ -225,24 +239,77 @@ export async function getProduct(url: string, headless = true) {
   const page = await setPage(browser);
   await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
 
-  const price = getPrice(
-    stripHTMLTags(await page.$eval('.c2h5', ({ innerHTML }) => innerHTML)),
-  );
-  const previousPrice = getPrice(
-    stripHTMLTags(await page.$eval('.c2h8', ({ innerHTML }) => innerHTML)),
-  );
-  const title = stripHTMLTags(
-    await page.$eval('.b3a8', ({ innerHTML }) => innerHTML),
-  );
-  const code = getCode(
-    stripHTMLTags(await page.$eval('.b2d7.b2d9', ({ innerHTML }) => innerHTML)),
-  );
-  const description = stripHTMLTags(
-    await page.$eval('.b0v2', ({ innerHTML }) => innerHTML),
-  );
-  const images = await page.$$eval('.b6e2 .b2g img', (nodes) =>
-    nodes.map(({ srcset }) => srcset),
-  );
+  await autoScroll(page);
+
+  let price = '';
+  try {
+    await page.waitForSelector('.c2h5');
+    price = getPrice(
+      stripHTMLTags(await page.$eval('.c2h5', ({ innerHTML }) => innerHTML)),
+    );
+  } catch (err) {
+    console.log(`Price for product ${url} wasn't found`);
+  }
+
+  let previousPrice = '';
+  try {
+    await page.waitForSelector('.c2h8');
+    previousPrice = getPrice(
+      stripHTMLTags(await page.$eval('.c2h8', ({ innerHTML }) => innerHTML)),
+    );
+  } catch (err) {
+    console.log(`Previous Price for product ${url} wasn't found`);
+  }
+
+  let title = '';
+  try {
+    await page.waitForSelector('.b3a8');
+    title = stripHTMLTags(
+      await page.$eval('.b3a8', ({ innerHTML }) => innerHTML),
+    );
+  } catch (err) {
+    console.log(`Title for product ${url} wasn't found`);
+  }
+
+  let code = '';
+  try {
+    await page.waitForSelector('.b2d7.b2d9');
+    code = getCode(
+      stripHTMLTags(
+        await page.$eval('.b2d7.b2d9', ({ innerHTML }) => innerHTML),
+      ),
+    );
+  } catch (err) {
+    console.log(`Code for product ${url} wasn't found`);
+  }
+
+  let description = '';
+  try {
+    await page.waitForSelector('.b0v2');
+    description = stripHTMLTags(
+      await page.$eval('.b0v2', ({ innerHTML }) => innerHTML),
+    );
+  } catch (err) {
+    console.log(`Description for product ${url} wasn't found`);
+  }
+
+  let images = '';
+  try {
+    await page.waitForSelector('.e0v4.e0v5 img._3Ugp');
+    images = await page.$$eval('.e0v4.e0v5 img._3Ugp', (nodes) =>
+      nodes.map(({ srcset }) => srcset),
+    );
+  } catch (err) {
+    console.log(`Images for product ${url} wasn't found`);
+  }
+
+  let inStock = true;
+  try {
+    await page.waitForSelector('.d9w7 .b0r4');
+    inStock = false;
+  } catch (err) {
+    console.log(`Product ${url} found in stock`);
+  }
 
   const data = {
     price,
@@ -251,6 +318,7 @@ export async function getProduct(url: string, headless = true) {
     code,
     images,
     description,
+    inStock,
   };
 
   const sectionNodes = await page.$$('[data-widget="webCharacteristics"] .da3');

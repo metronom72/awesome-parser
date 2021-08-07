@@ -19,7 +19,6 @@ export const ProductDTOSchema = (scope?: string) =>
   new Schema({
     id: {
       type: String,
-      required: true,
     },
     title: {
       type: String,
@@ -56,11 +55,11 @@ export const ProductDTOSchema = (scope?: string) =>
       required: true,
     },
     price: {
-      type: Number,
+      type: String,
       required: true,
     },
     previousPrice: {
-      type: Number,
+      type: String,
     },
     scope: {
       type: Number,
@@ -74,9 +73,14 @@ export const ProductDTOSchema = (scope?: string) =>
       required: true,
     },
   });
+
 export const mapToDTO = (
   product: ProductDocument,
-): { product: ProductDTOType; errors?: any[] } => {
+  includeErrors = true,
+): {
+  product: ProductDTOType;
+  errors?: Array<{ message: string; path: string }>;
+} => {
   const productDTO = {
     id: product._id,
     title: product.title,
@@ -92,9 +96,13 @@ export const mapToDTO = (
   const errors = ProductDTOSchema(product.scope).validate(product.toJSON());
   return {
     product: productDTO,
-    errors: errors.map(({ message, path }) => ({
-      message,
-      path,
-    })),
+    ...(includeErrors
+      ? {
+          errors: errors.map(({ message, path }) => ({
+            message,
+            path,
+          })),
+        }
+      : {}),
   };
 };

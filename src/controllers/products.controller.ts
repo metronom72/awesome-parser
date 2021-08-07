@@ -8,7 +8,7 @@ export class ProductsController {
 
   @Get()
   public getProducts(@ReqData() data: ISearchQuery) {
-    return [];
+    return this.productsService.getProducts(data);
   }
 
   @Get('/:id')
