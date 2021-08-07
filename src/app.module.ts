@@ -18,6 +18,8 @@ import {
 } from './processors/parse-product.processor';
 import { Product, ProductSchema } from './models/product.model';
 import { ConfigModule } from '@nestjs/config';
+import { AdminProductsService } from './services/admin-products.service';
+import { ProductsController } from './controllers/products.controller';
 
 @Module({
   imports: [
@@ -57,9 +59,10 @@ import { ConfigModule } from '@nestjs/config';
       },
     ]),
   ],
-  controllers: [ParserPlanController],
+  controllers: [ParserPlanController, ProductsController],
   providers: [
     ParserPlanService,
+    AdminProductsService,
     ParseRootProcessor,
     ParseCategoryProcessor,
     ParseProductProcessor,

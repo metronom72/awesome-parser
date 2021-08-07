@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { JOB_STATUSES } from '../interfaces';
 
 @Schema()
 export class Product {
@@ -25,6 +26,9 @@ export class Product {
   description: string;
 
   @Prop()
+  subheader: string;
+
+  @Prop()
   price: string;
 
   @Prop()
@@ -34,7 +38,16 @@ export class Product {
   jobId: string | null;
 
   @Prop()
-  status: string;
+  status: JOB_STATUSES;
+
+  @Prop()
+  inStock: boolean;
+
+  @Prop()
+  scope: string;
+
+  @Prop()
+  slug: string;
 }
 
 export type ProductDocument = Product & Document;

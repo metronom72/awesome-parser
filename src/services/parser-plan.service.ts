@@ -9,7 +9,7 @@ import { ProductDocument, Product } from '../models/product.model';
 import { Model } from 'mongoose';
 import { CategoryDocument, Category } from '../models/category.model';
 import { JOB_STATUSES } from '../interfaces';
-import { defaultOptions, getJobOpts } from '../processors/options';
+import { getJobOpts } from '../processors/options';
 import { stripQuery } from '../helpers/url-helpers';
 
 export enum ParsingTaskEnum {
@@ -104,16 +104,4 @@ export class ParserPlanService {
     }
     return null;
   }
-
-  // private async getActiveTask(url: OriginTypes) {
-  //   const client = new cloudTasks.CloudTasksClient();
-  //   const name = client.taskPath(
-  //     GCP_PROJECT,
-  //     GCP_REGION,
-  //     PARSER_PLAN_QUEUE,
-  //     TaskNames.GENERATE_PARSER_PLAN,
-  //   );
-  //   const res = await client.getTask({ name });
-  //   console.log(res);
-  // }
 }

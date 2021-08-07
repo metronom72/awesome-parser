@@ -5,7 +5,7 @@ import {
 } from '../services/parser-plan.service';
 import { ReqData } from '../helpers/req-data';
 
-@Controller('/parser-plan')
+@Controller('/api/v1/parser-plan')
 export class ParserPlanController {
   constructor(private parserPlanService: ParserPlanService) {}
 

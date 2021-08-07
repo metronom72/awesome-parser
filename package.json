@@ -44,7 +44,8 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
-    "user-agents": "^1.0.707"
+    "user-agents": "^1.0.707",
+    "valivar": "^6.2.11"
   },
   "devDependencies": {
     "@nestjs/cli": "^7.5.1",
