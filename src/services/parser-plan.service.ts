@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { ParseRootProcessorName } from '../processors/parse-root.processor';
@@ -53,6 +53,12 @@ export class ParserPlanService {
         await dbCategory.save();
       }
 
+      if (dbCategory.status === JOB_STATUSES.PENDING) {
+        throw new BadRequestException(
+          `Category with ${url} and id ${dbCategory.id} already exists in Queue`,
+        );
+      }
+
       dbCategory =
         dbCategory ||
         (await this.category.create({
@@ -77,6 +83,12 @@ export class ParserPlanService {
       dbProduct = await this.product.findOne({
         url: url,
       });
+
+      if (dbProduct.status === JOB_STATUSES.PENDING) {
+        throw new BadRequestException(
+          `Product with ${url} and id ${dbProduct.id} already exists in Queue`,
+        );
+      }
 
       if (dbProduct) {
         dbProduct.status = JOB_STATUSES.PENDING;
