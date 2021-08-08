@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Query } from '@nestjs/common';
 import { ParseProductProcessorName } from '../processors/parse-product.processor';
 import { Queue } from 'bull';
 import { InjectModel } from '@nestjs/mongoose';
@@ -6,12 +6,10 @@ import { Product, ProductDocument } from '../models/product.model';
 import { Model } from 'mongoose';
 import { InjectQueue } from '@nestjs/bull';
 import { mapToDTO } from '../mappers/product.mapper';
-import {
-  INewProduct,
-  IProduct,
-  ISearchQuery,
-} from '../controllers/products.controller';
+import { INewProduct, IProduct } from '../controllers/products.controller';
 import { ParserPlanService, ParsingTaskEnum } from './parser-plan.service';
+import { GetProductsDTO } from '../dtos/admin-products.dto';
+import { ReqData } from '../helpers/req-data';
 
 const FIRST_PAGE = 1;
 const DEFAULT_PER_PAGE = 30;
@@ -34,7 +32,7 @@ export class AdminProductsService {
     }
   }
 
-  public async getProducts(query: ISearchQuery) {
+  public async getProducts(@Query() query: GetProductsDTO) {
     try {
       const {
         page = FIRST_PAGE,

@@ -21,6 +21,8 @@ export const ReqData = createParamDecorator(
       };
     }
 
+    console.log(result);
+
     return data ? result[data] : result;
   },
 );

@@ -11,7 +11,8 @@ async function bootstrap() {
       validateCustomDecorators: true,
     }),
   );
-  await app.listen(3000);
+  app.enableCors();
+  await app.listen(process.env.APPLICATION_PORT);
 }
 // bootstrap();
 AppClusterService.clusterize(bootstrap);

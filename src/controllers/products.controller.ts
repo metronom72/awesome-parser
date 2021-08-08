@@ -1,13 +1,14 @@
 import { Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { ReqData } from '../helpers/req-data';
 import { AdminProductsService } from '../services/admin-products.service';
+import { GetProductsDTO } from '../dtos/admin-products.dto';
 
 @Controller('/api/v1/admin/products')
 export class ProductsController {
   constructor(private productsService: AdminProductsService) {}
 
   @Get()
-  public getProducts(@ReqData() data: ISearchQuery) {
+  public getProducts(@ReqData() data: GetProductsDTO) {
     return this.productsService.getProducts(data);
   }
 
