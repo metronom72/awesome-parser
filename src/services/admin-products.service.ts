@@ -44,9 +44,12 @@ export class AdminProductsService {
         .skip(page > 0 ? (page - 1) * perPage : 0)
         .limit(perPage);
 
+      const total = await this.product.count();
+
       return {
         products: products.map((product) => mapToDTO(product, includeErrors)),
         query,
+        total: Math.ceil(total / perPage),
       };
     } catch (err) {
       throw new BadRequestException(
